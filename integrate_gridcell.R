@@ -81,10 +81,23 @@ integrate_gridcell <- function( arr, global=TRUE ){
 
   }
 
-  if (global){
+  if (!global){
 
-    out <- arr * arr_area
+    ## actually integrate
+    if (length(dim(arr))==2){
+      
+      out <- arr * arr_area
 
+    } else if (length(dim(arr))==3){
+      
+      ## get global total unlimited GPP over time
+      out <- sweep( arr, 1, arr_area, "*", check.margin=FALSE )
+
+    } else {
+      print("cannot deal with this number of dimensions")
+      out <- NA
+    }
+    
   } else {
 
     ## actually integrate
