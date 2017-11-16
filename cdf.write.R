@@ -7,7 +7,7 @@
 ## lon:    Is a 1-dimensional array containing the longitudes of the grid cell's mid-points.
 ## lat:    Is a 1-dimensional array containing the latitudes of the grid cell's mid-points.
 ## filnam: Is a string defining the name of the NetCDF file to be written.
-## z_dim:  Is an integer indicating the position at which the field 'var' is written in the 3rd dimension ("Z"). Defaults to NA (no z-dimension is written).
+## z_dim:  Is an integer indicating the position at which the field 'var' is written in the 3rd dimension ("z"). Defaults to NA (no z-dimension is written).
 ## time:   Is a vector containing the time coordinates. Defaults to NA (no time dim. is written).
 ## make.zdim : Write a z-dimension. If var is 2-dimensional, create an additional dimension of length 1.
 ## make.tdim : Write a time dimension. If var is 2-dimensional, create an additional dimension of length 1.
@@ -39,7 +39,8 @@ cdf.write <- function(
                       units_time     = NA,
                       long_name_var1 = NA,
                       long_name_var2 = NA,
-                      glob_title     = NA
+                      glob_title     = NA,
+                      glob_hist      = NA
                       ){
   library(RNetCDF)
   
@@ -142,24 +143,24 @@ cdf.write <- function(
   nc <- create.nc(filnam)
 
   if (verbose) {print("define dimensions...")}
-  dim.def.nc(nc,"LONGITUDE",length(lon))
-  dim.def.nc(nc,"LATITUDE",length(lat))
+  dim.def.nc(nc,"lon",length(lon))
+  dim.def.nc(nc,"lat",length(lat))
   if (make.zdim){
-    dim.def.nc(nc,"Z",length(z_dim))
+    dim.def.nc(nc,"z",length(z_dim))
   }
   if (make.tdim){
-    dim.def.nc(nc,"TIME",length(time))
+    dim.def.nc(nc,"time",length(time))
   }
   
   ## Create variables and coordinate variables
   if (verbose) {print("define dimension variables...")}
-  var.def.nc(nc,"LATITUDE","NC_FLOAT","LATITUDE")
-  var.def.nc(nc,"LONGITUDE","NC_FLOAT","LONGITUDE")
+  var.def.nc(nc,"lat","NC_FLOAT","lat")
+  var.def.nc(nc,"lon","NC_FLOAT","lon")
   if (make.zdim){
-    var.def.nc(nc,"Z","NC_INT","Z")
+    var.def.nc(nc,"z","NC_INT","z")
   }
   if (make.tdim){
-    var.def.nc(nc,"TIME","NC_FLOAT","TIME")
+    var.def.nc(nc,"time","NC_FLOAT","time")
   }
   
   ## The dimensions must be in the reverse order, as the fastest
@@ -255,19 +256,19 @@ cdf.write <- function(
     att.put.nc(nc,"NC_GLOBAL","title","NC_CHAR",varnam5)
   }
   att.put.nc(nc,"NC_GLOBAL","history","NC_CHAR", paste("Created on", date(), "by Beni Stocker"))
-  att.put.nc(nc,"LONGITUDE","units","NC_CHAR","degrees_east")
-  att.put.nc(nc,"LONGITUDE","long_name","NC_CHAR","LONGITUDE")
-  att.put.nc(nc,"LONGITUDE","GridType","NC_CHAR","Cylindrical Equidistant projection Grid")
-  att.put.nc(nc,"LATITUDE","units","NC_CHAR","degrees_north")
-  att.put.nc(nc,"LATITUDE","long_name","NC_CHAR","LATITUDE")
-  att.put.nc(nc,"LATITUDE","GridType","NC_CHAR","Cylindrical Equidistant projection Grid")
+  att.put.nc(nc,"lon","units","NC_CHAR","degrees_east")
+  att.put.nc(nc,"lon","long_name","NC_CHAR","lon")
+  att.put.nc(nc,"lon","GridType","NC_CHAR","Cylindrical Equidistant projection Grid")
+  att.put.nc(nc,"lat","units","NC_CHAR","degrees_north")
+  att.put.nc(nc,"lat","long_name","NC_CHAR","lat")
+  att.put.nc(nc,"lat","GridType","NC_CHAR","Cylindrical Equidistant projection Grid")
   if (make.tdim){
-    att.put.nc(nc,"TIME","units","NC_CHAR","years")
-    att.put.nc(nc,"TIME","long_name","NC_CHAR","TIME")
+    att.put.nc(nc,"time","units","NC_CHAR",units_time)
+    att.put.nc(nc,"time","long_name","NC_CHAR","time")
   }
   if (make.zdim){
-    att.put.nc(nc,"Z","units","NC_CHAR","none")
-    att.put.nc(nc,"Z","long_name","NC_CHAR","none")
+    att.put.nc(nc,"z","units","NC_CHAR","none")
+    att.put.nc(nc,"z","long_name","NC_CHAR","none")
   }
 
   ## optional attributes passed on as arguments
@@ -278,7 +279,7 @@ cdf.write <- function(
     att.put.nc( nc, varnam2, "units", "NC_CHAR", units_var2 )
   }
   if( !is.na(units_time) && make.tdim){
-    att.put.nc( nc, "TIME", "units", "NC_CHAR", units_time )
+    att.put.nc( nc, "time", "units", "NC_CHAR", units_time )
   }
   if( !is.na(long_name_var1)){
     att.put.nc( nc, varnam, "long_name", "NC_CHAR", long_name_var1 )
@@ -289,25 +290,27 @@ cdf.write <- function(
   if( !is.na(glob_title)){
     att.put.nc( nc, "NC_GLOBAL", "title", "NC_CHAR", glob_title )
   }
-
+  if( !is.na(glob_hist)){
+    att.put.nc( nc, "NC_GLOBAL", "history", "NC_CHAR", glob_hist )
+  }
 
   ## Put the data
   if (verbose) {print("put the data...")}
 
   if (verbose) {print("longitude...")}
-  var.put.nc(nc,"LONGITUDE",lon, NA, NA, na.mode=0)
+  var.put.nc(nc,"lon",lon, NA, NA, na.mode=0)
 
   if (verbose) {print("latitude...")}
-  var.put.nc(nc,"LATITUDE",lat, NA, NA, na.mode=0)
+  var.put.nc(nc,"lat",lat, NA, NA, na.mode=0)
 
   if (make.tdim){
     if (verbose) {print("time...")}
-    var.put.nc(nc,"TIME",time, NA, NA, na.mode=0)
+    var.put.nc(nc,"time",time, NA, NA, na.mode=0)
   }
 
   if (make.zdim){
     if (verbose) {print("z-dimension...")}
-    var.put.nc(nc,"Z",z_dim, NA, NA, na.mode=0)
+    var.put.nc(nc,"z",z_dim, NA, NA, na.mode=0)
   }
 
   if (verbose) {print("variable 1...")}
