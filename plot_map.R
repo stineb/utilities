@@ -1,10 +1,10 @@
-plot_map <- function( arr, lev, file=NA, positive=TRUE ){
+plot_map <- function( arr, lev, file=NA, positive=TRUE, toplefttext=NA, toprighttext=NA, color=NA, minval=NA, maxval=NA ){
 
   require( ncdf4, quietly = TRUE )
   require( fields, quietly = TRUE )
   require( sp, quietly = TRUE )
   require( maptools, quietly = TRUE )
-  require( dplyr, quietly = TRUE )  
+  require( dplyr, quietly = TRUE )
 
   if ( dim(arr)[1]==720 && dim(arr)[2]==360 ){
 
@@ -48,18 +48,16 @@ plot_map <- function( arr, lev, file=NA, positive=TRUE ){
     # layout.show( panel )
 
     ## Color key
-    # par( mar=c(3,3,1,1),xaxs="i", yaxs="i",las=1)
-    if (positive){
-      color <- c( "wheat", "tomato", "tomato4" )
-    } else {
-      color <- c( "royalblue4", "royalblue1", "wheat", "tomato", "tomato4" )      
+    if (is.na(color)){
+      ## use default colors
+      if (positive){
+        color <- c( "wheat", "tomato2", "tomato4" )
+      } else {
+        color <- c( "royalblue4", "royalblue2", "wheat", "tomato2", "tomato4" )      
+      }
     }
 
-    # lev <- c( 0, 0.5, 0.7, 0.8, 0.9, 0.95, 1, 1.01, 1.02, 1.05, 1.1, 1.2, 1.5, 2, 999 )
-    # lev <- seq(-2,2,0.2)
-    # lev <- c( 0, 0.2, 0.4, 0.6, 0.8, 0.9, 1, 1.1, 1.2, 1.5, 2, 3, 999 )
-
-    out.mycolorbar <- mycolorbar( color, lev, orient="v", plot=FALSE, maxval=1000 )
+    out.mycolorbar <- mycolorbar( color, lev, orient="v", plot=FALSE, minval=minval, maxval=maxval )
 
     par( mar=c(3,3,1,1),xaxs="i", yaxs="i",las=1)
     image(
@@ -84,6 +82,9 @@ plot_map <- function( arr, lev, file=NA, positive=TRUE ){
 
     axis( 3, at=lon.labels, lab=F, lwd=1.5 )
     axis( 3, at=lon.short, lab=F, lwd=1, tck=-0.01 )
+
+    if (!is.na(toplefttext))  mtext( toplefttext, line=1, adj=0, font=2 )
+    if (!is.na(toprighttext)) mtext( toprighttext, line=1, adj=1 )    
 
     ## Color key
     par( mar=c(3,3,1,1),xaxs="i", yaxs="i",las=1)
