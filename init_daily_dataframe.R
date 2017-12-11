@@ -1,7 +1,6 @@
 init_daily_dataframe <- function( yrstart, yrend ){
 
   ndaymonth <- c(31,28,31,30,31,30,31,31,30,31,30,31)
-
   ndayyear <- sum(ndaymonth) 
   nmonth   <- length(ndaymonth)
   nyrs    <- length( yrstart:yrend )
@@ -21,8 +20,9 @@ init_daily_dataframe <- function( yrstart, yrend ){
     dom=dm,
     year=rep( yrstart:yrend, each=ndayyear ) 
   )
-  ddf$date <- as.POSIXct( as.Date( paste( as.character(ddf$year), "-01-01", sep="" ) ) + ddf$doy - 1 )
   ddf$year_dec <- ddf$year + ( ddf$doy - 1 ) / sum( ndaymonth )
+  ddf$date <- as.POSIXct( as.Date( paste( as.character(ddf$year), "-01-01", sep="" ) ) + ddf$doy - 1 )
 
   return( ddf )
 }
+

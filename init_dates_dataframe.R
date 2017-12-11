@@ -40,11 +40,14 @@ init_dates_dataframe <- function( yrstart, yrend, startmoy=1, startdoy=1, freq="
       doy <- dates$yday + 1
       dom <- dates$mday
       year <- dates$year + 1900
-      year_dec <- year + ( doy - 1 ) / 365
 
       dates <- dates %>% as.POSIXct()
 
-      ddf <- tibble( date=dates, year_dec=year_dec, year=year, moy=moy, dom=dom, doy=doy )
+      ddf <- tibble( date=dates, year=year, moy=moy, dom=dom, doy=doy )
+
+      ddf <- ddf %>% mutate( ndayyear = ifelse( (year %% 4) == 0, 366, 365  ) ) %>%
+                     mutate( year_dec = year + (doy - 1) / ndayyear ) %>% 
+                     select( -ndayyear )
 
     }
 
