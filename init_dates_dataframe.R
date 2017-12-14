@@ -31,23 +31,15 @@ init_dates_dataframe <- function( yrstart, yrend, startmoy=1, startdoy=1, freq="
 
     } else {
 
-      startdate <- as.POSIXlt( as.Date( paste0( as.character(yrstart), "-", sprintf( "%02d", startmoy), "-01" ) ) + startdoy - 1 )
-      enddate   <- as.POSIXlt( as.Date( paste0( as.character(yrend  ), "-", sprintf( "%02d", endmoy  ), "-", sprintf( "%02d", enddom  ) ) ) )    
+      startdate <- ymd( paste0( as.character(yrstart), "-", sprintf( "%02d", startmoy), "-01" ) ) + days( startdoy - 1 )
+      enddate   <- ymd( as.Date( paste0( as.character(yrend  ), "-", sprintf( "%02d", endmoy  ), "-", sprintf( "%02d", enddom  ) ) ) )
+      dates     <- seq( from = startdate, to = enddate, by = freq )
 
-      dates <- seq( from = startdate, to = enddate, by = freq ) %>% as.POSIXlt()
-
-      moy <- dates$mon + 1
-      doy <- dates$yday + 1
-      dom <- dates$mday
-      year <- dates$year + 1900
-
-      dates <- dates %>% as.POSIXct()
-
-      ddf <- tibble( date=dates, year=year, moy=moy, dom=dom, doy=doy )
-
-      ddf <- ddf %>% mutate( ndayyear = ifelse( (year %% 4) == 0, 366, 365  ) ) %>%
-                     mutate( year_dec = year + (doy - 1) / ndayyear ) %>% 
-                     select( -ndayyear )
+      ddf <-  tibble( date=dates ) %>% 
+              mutate( ndayyear = ifelse( (year(date) %% 4) == 0, 366, 365  ) ) %>%
+              mutate( year_dec = year(date) + ( yday(date) - 1 ) / ndayyear,
+                      doy = yday(date) ) %>% 
+              select( -ndayyear )
 
     }
 
