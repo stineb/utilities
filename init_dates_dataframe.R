@@ -1,6 +1,7 @@
 init_dates_dataframe <- function( yrstart, yrend, startmoy=1, startdoy=1, freq="days", endmoy=12, enddom=31, noleap=FALSE ){
 
   require(dplyr)
+  require(lubridate)
 
   if (freq=="days"){
 
