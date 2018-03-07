@@ -6,7 +6,7 @@
 #
 # written by Tyler W. Davis
 # created: 2011-02-17
-# updated 2016-03-23
+# updated: 2018-03-06
 #
 # ~~~~~~~~~~~~
 # description:
@@ -39,24 +39,49 @@
 # ~~~~~~~~~~
 # changelog:
 # ~~~~~~~~~~
-# 01. added threshold option to monochrome function [11.03.10]
-# 02. added language option to totxt function [11.03.10]
-# 03. updated function doc strings [14.11.24]
-# 04. implemented glob for file searching [14.11.26]
-# 05. PEP8 style fixes [15.11.13]
-# 06. updated find files [16.03.23]
-# 08. added grayscale utility function [16.03.23]
+# 11.03.10
+# - added threshold option to monochrome function
+# - added language option to totxt function
+# 14.11.24
+# - updated function doc strings
+# 14.11.26
+# - implemented glob for file searching
+# 15.11.13
+# - PEP8 style fixes
+# 16.03.23
+# - updated find files
+# - added grayscale utility function
+# 18.03.06
+# - fixed issue with hardcoded file extensions
+# - fixed function calls in main
+# - added new modules
+# - created check function for tesseract
 #
 ###############################################################################
 # IMPORT MODULES:
 ###############################################################################
 import glob
 import os
+import subprocess
+import sys
 
 
 ###############################################################################
 # FUNCTIONS
 ###############################################################################
+def check_tesseract():
+    """Checks if tesseract is installed and working"""
+    try:
+        if sys.version_info >= (3, 5):
+            return subprocess.run(
+                ['tesseract', '-v'], stdout=subprocess.PIPE).returncode
+        else:
+            return subprocess.call(
+                ['tesseract', '-v'], stdout=subprocess.PIPE)
+    except:
+        return -1
+
+
 def findfiles(my_dir=".", my_ext=".jpg"):
     """
     Name:     findfiles
@@ -71,51 +96,51 @@ def findfiles(my_dir=".", my_ext=".jpg"):
     return (my_list)
 
 
-def grayscale(myjpg):
+def grayscale(myjpg, myext=".jpg"):
     """
     Name:     grayscale
     Input:    str, image file name (myjpg)
+              - [optional] str, file extension (my_ext)
     Output:   None.
     Features: Processes JPG image to grayscale.
     """
-    myext = ".jpg"
     jpgbase = ""
     if myjpg.endswith(myext):
         # jpgbase holds the file name without the extension
         jpgbase = myjpg[:-len(myext)]
 
-    mycmd = ("convert -type Grayscale " + myjpg + " " + jpgbase + "_y.jpg")
+    mycmd = ("convert -type Grayscale " + myjpg + " " + jpgbase + "_y" + myext)
     os.system(mycmd)
 
 
-def monochrome(myjpg, thresh=90):
+def monochrome(myjpg, thresh=90, myext=".jpg"):
     """
     Name:     monochrome
     Input:    -str, image file name (myjpg)
               -int, threshold value (thresh)
+              - [optional] str, file extension (myext)
     Output:   None.
     Features: Processes JPG image with text with threshold filter to remove
               background noise.
     """
-    myext = ".jpg"
     jpgbase = ""
     if myjpg.endswith(myext):
         # jpgbase holds the file name without the extension
         jpgbase = myjpg[:-len(myext)]
 
     mycmd = ("convert -threshold " + str(thresh) + "% " +
-             myjpg + " " + jpgbase + "_m.jpg")
+             myjpg + " " + jpgbase + "_m" + myext)
     os.system(mycmd)
 
 
-def totif(myjpg):
+def totif(myjpg, myext=".jpg"):
     """
     Name:     totif
-    Input:    str, image file name (myjpg)
+    Input:    - str, image file name (myjpg)
+              - [optional] stre, file extension (myext)
     Output:   None.
     Features: Converts JPG image to TIF format
     """
-    myext = ".jpg"
     jpgbase = ""
     if myjpg.endswith(myext):
         jpgbase = myjpg[:-len(myext)]
@@ -144,20 +169,23 @@ def totxt(mytif, lang="eng"):
 # MAIN
 ###############################################################################
 if __name__ == '__main__':
-    my_jpgs = findfiles("./original_jpg", ".jpg")
-    if my_jpgs:
+    my_fext = ".png"
+    my_dir = "./"
+    my_jpgs = findfiles(my_dir, my_fext)
+
+    if check_tesseract() == 0 and my_jpgs:
         # Process JPGs with noise filter:
         for name in my_jpgs:
-            monochrome(name, 75)
+            monochrome(name, 75, my_fext)
 
         # Convert JPGs to TIFs
-        my_jpg_ms = findfiles('_m.jpg')
+        my_jpg_ms = findfiles(my_dir, '_m' + my_fext)
         for name in my_jpg_ms:
-            totif(name)
+            totif(name, my_fext)
 
         # Convert TIFs to text:
-        my_tifs = findfiles('_m.tif')
+        my_tifs = findfiles(my_dir, '_m.tif')
         for name in my_tifs:
             totxt(name)
     else:
-        print("Did not find any JPG files to process!")
+        print("Did not find any image files to process!")
