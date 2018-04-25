@@ -6,7 +6,7 @@ init_dates_dataframe <- function( yrstart, yrend, startmoy=1, startdoy=1, freq="
   if (freq=="days"){
 
     startdate <- ymd( paste0( as.character(yrstart), "-", sprintf( "%02d", startmoy), "-01" ) ) + days( startdoy - 1 )
-    enddate   <- ymd( as.Date( paste0( as.character(yrend  ), "-", sprintf( "%02d", endmoy  ), "-", sprintf( "%02d", enddom  ) ) ) )
+    enddate   <- ymd( as.Date( paste0( as.character(yrend), "-", sprintf( "%02d", endmoy  ), "-", sprintf( "%02d", enddom  ) ) ) )
     dates     <- seq( from = startdate, to = enddate, by = freq )
 
     ddf <-  tibble( date=dates ) %>% 
